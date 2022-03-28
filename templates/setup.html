@@ -1,0 +1,27 @@
+<html>
+<head>
+    <title>Canvas Setup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+</head>
+<body>
+    <h1 class="header">Canvas Notifier Setup</h1>
+    <br>
+    <center>
+        <form action="/submitAPI" method="POST">
+            <label>Enter the URL you use to access Canvas (i.e https://coolSchool.instructure.com/)</label>
+            <br>
+            <input pattern="https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)" placeholder="Enter a URL" type="text" id="url" class="bigInput" name="url" required>
+            <br>
+            <br>
+            <label>Enter your Canvas API Key</label>
+            <br>
+            <input placeholder="Enter your API Key" type="text" id="apiKey" class="bigInput" name="apiKey" required>
+            <br>
+            <br>
+            <input type="submit" class="bigButton" value="Submit">
+        </form>
+    </center>
+    </body>
+
+</html>
