@@ -3,12 +3,13 @@
 # -------
 # Standard Libraries
 import os
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from secrets import token_urlsafe
+import token
 # Connected Scripts
 import canvasHandler
 import config
 # Pip Libraries
-from flask import Flask, redirect, url_for, render_template, request, send_from_directory
+from flask import Flask, make_response, redirect, url_for, render_template, request, send_from_directory
 import validators
 
 #  ----------------------------
@@ -25,6 +26,19 @@ def getFiles(directory):
             files[file] = str(fileData.read())
     return files
 
+def initGlobals():
+    global assignments, courses
+    if 'assignments' not in globals() or 'courses' not in globals():
+        assignments = {}
+        courses = {}
+
+def loadToCache(token, url, apiKey):
+    global assignments, courses
+    initGlobals()
+    loadedCourses, loadedAssignments = canvasHandler.retrieveAssignments(
+        url, apiKey)
+    courses[token] = loadedCourses
+    assignments[token] = loadedAssignments
 
 @app.route('/favicon.ico')
 def favicon():
@@ -42,10 +56,15 @@ def handleAPI():
             if validators.url(apiInfo["url"]):
                 print("oh and I love your url")
                 try:
-                    courses, assignments = canvasHandler.retrieveAssignments(
-                        apiInfo["url"], apiInfo["apiKey"])
+                    userToken = token_urlsafe(64)
+                    while userToken in config.read().keys():  # Make sure token doesnt already exist
+                        userToken = token_urlsafe(64)  # The chances of this running are like actually zero
+                    loadToCache(token, apiInfo["url"], apiInfo["apiKey"])
                     print('what sexy assignments you got there', apiInfo["apiKey"])
-                    config.write(apiInfo)
+                    response = make_response(redirect(url_for('indexPage')))
+                    response.set_cookie('userID', userToken)
+                    config.write(apiInfo, userToken=userToken)
+                    return response
                 except Exception as e:
                     print(e)
         
@@ -53,22 +72,30 @@ def handleAPI():
 
 @app.route("/setup")
 def setupSite():
-    if config.validConfig():
+    if config.verifyUser(request.cookies.get('userID')):
         return redirect(url_for('indexPage'))
+
     return render_template('setup.html')
 
 @app.route("/", methods=["POST", "GET"])
 def indexPage():
-    if not config.validConfig():  # Check if config is valid before doing anything
+    token = request.cookies.get('userID')
+    # Check if cookie is visible first
+    if not config.verifyUser(token):
         return redirect(url_for('setupSite'))
-    
+
     # Now handle front page
     global assignments, courses
-    if 'assignments' not in globals() or 'courses' not in globals() or request.method == "POST":
-        apiInfo = config.read()
-        courses, assignments = canvasHandler.retrieveAssignments(apiInfo["url"], apiInfo["apiKey"])
-    print(assignments)
-    return render_template('index.html', assignments=assignments)
+    initGlobals()
+    if request.method == "POST" or token not in assignments.keys() or token not in courses.keys(): # Data is reloaded or user token is not in thingies
+        userConfig = config.read(userToken=token)
+        loadToCache(token, userConfig["url"], userConfig["apiKey"])
+        
+    return render_template('index.html', assignments=assignments[token])
 
 
-app.run(debug=True)
+if config.validConfig():  # Check if config is valid before doing anything
+    app.run(debug=True)
+else:
+    print("ERROR: There is an issue with config/api.json. Please check the file for problems!")
+
