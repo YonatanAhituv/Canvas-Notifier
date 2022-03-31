@@ -1,11 +1,12 @@
 <html>
 <head>
-    <title>Canvas Setup</title>
+    <title>Canvas Helper Setup</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+    <script src="{{ url_for('static',filename='scripts/input.js') }}"></script>
 </head>
 <body>
-    <h1 class="header">Canvas Notifier Setup</h1>
+    <h1 class="header">Canvas Helper Setup</h1>
     <br>
     <center>
         <form action="/submitAPI" method="POST">
@@ -15,8 +16,10 @@
             <br>
             <br>
             <label>Enter your Canvas API Key</label>
+            <a target="_blank" href="" id="helperURL"></a>
+            <label class="small-label" id="helper"><i>Enter your url first for help!</i></label>
             <br>
-            <input placeholder="Enter your API Key" type="text" id="apiKey" class="bigInput" name="apiKey" required>
+            <input placeholder="Enter your API Key" type="password" id="apiKey" class="bigInput" name="apiKey" required>
             <br>
             <br>
             <input type="submit" class="bigButton" value="Submit">

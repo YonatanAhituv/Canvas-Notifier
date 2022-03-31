@@ -3,3 +3,5 @@ config/
 __pycache__/
 .DS_Store
 *.code-workspace
+*.pem
+*_key.txt

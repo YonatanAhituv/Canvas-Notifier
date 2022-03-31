@@ -64,6 +64,9 @@ td {
 body {
   background-color: #2B2D42;
 }
+a {
+  font-size: 20;
+}
 .sideBySide {
   margin: 0;
   display:inline-block;
@@ -117,6 +120,10 @@ body {
 .center {
   margin-left: auto;
   margin-right: auto;
+}
+.small-label {
+  font-size: 20;
+  font-weight: 300;
 }
 label {
   font-weight: 500;

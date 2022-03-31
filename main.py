@@ -60,7 +60,7 @@ def handleAPI():
                     while userToken in config.read().keys():  # Make sure token doesnt already exist
                         userToken = token_urlsafe(64)  # The chances of this running are like actually zero
                     loadToCache(token, apiInfo["url"], apiInfo["apiKey"])
-                    print('what sexy assignments you got there', apiInfo["apiKey"])
+                    print('what sexy assignments you got there')
                     response = make_response(redirect(url_for('indexPage')))
                     response.set_cookie('userID', userToken)
                     config.write(apiInfo, userToken=userToken)
