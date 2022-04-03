@@ -94,7 +94,7 @@ def indexPage():
     return render_template('index.html', assignments=assignments[token])
 
 
-if config.validConfig():  # Check if config is valid before doing anything
+if config.validConfig(initConfig=True):  # Check if config is valid before doing anything
     app.run(debug=True)
 else:
     print("ERROR: There is an issue with config/api.json. Please check the file for problems!")

@@ -27,10 +27,13 @@ def getCourses(canvasURL, apiKey):
     visibleCourses = []
 
     for course in courses:
-        if course.term['end_at'] is None:
+        try: # If course is irregular somehow just keep going
+            if course.term['end_at'] is None:
+                continue
+            elif futureDate(course.term['end_at']):
+                visibleCourses.append(course)
+        except:
             continue
-        elif futureDate(course.term['end_at']):
-            visibleCourses.append(course)
 
     return visibleCourses
 

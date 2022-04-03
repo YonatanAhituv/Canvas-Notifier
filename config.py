@@ -1,10 +1,16 @@
 import os, json
 
-def validConfig():  # Very messy sanity check
+def validConfig(initConfig=False):  # Very messy sanity check
+    fileExists = True
     if 'config' not in os.listdir():
-        return False
+        fileExists = False
     elif 'api.json' not in os.listdir('config'):
+        fileExists = False
+    if not fileExists and not initConfig:
         return False
+    elif fileExists and initConfig:
+        with open('config/api.json', 'w') as file:
+            file.write('{}')
     # api.json exists
     with open('config/api.json') as file:
         config = file.read()
@@ -12,7 +18,7 @@ def validConfig():  # Very messy sanity check
         config = json.loads(config)
     except ValueError:
         return False
-    return True  # File exists, is valid json, has the right keys, and the keys have stuff in them
+    return True  # File exists, is valid json
 
 def read(userToken=None):
     with open('config/api.json') as file:
