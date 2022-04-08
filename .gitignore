@@ -1,7 +1,10 @@
 .venv
 config/
 __pycache__/
+.ipynb_checkpoints/
+.vscode/
 .DS_Store
 *.code-workspace
 *.pem
 *_key.txt
+*.ipynb

@@ -3,11 +3,10 @@
 # -------
 # Standard Libraries
 import os
-from secrets import token_urlsafe
 import token
 # Connected Scripts
 import canvasHandler
-import config
+import db
 # Pip Libraries
 from flask import Flask, make_response, redirect, url_for, render_template, request, send_from_directory
 import validators
@@ -19,13 +18,6 @@ import validators
 global courses, assignments
 
 app = Flask(__name__)
-def getFiles(directory):
-    files = {}
-    for file in os.listdir(directory):
-        with open(directory + "/" + file) as fileData:
-            files[file] = str(fileData.read())
-    return files
-
 def initGlobals():
     global assignments, courses
     if 'assignments' not in globals() or 'courses' not in globals():
@@ -56,14 +48,11 @@ def handleAPI():
             if validators.url(apiInfo["url"]):
                 print("oh and I love your url")
                 try:
-                    userToken = token_urlsafe(64)
-                    while userToken in config.read().keys():  # Make sure token doesnt already exist
-                        userToken = token_urlsafe(64)  # The chances of this running are like actually zero
                     loadToCache(token, apiInfo["url"], apiInfo["apiKey"])
                     print('what sexy assignments you got there')
+                    userToken = db.storeUser(apiInfo["url"], apiInfo["apiKey"])
                     response = make_response(redirect(url_for('indexPage')))
                     response.set_cookie('userID', userToken)
-                    config.write(apiInfo, userToken=userToken)
                     return response
                 except Exception as e:
                     print(e)
@@ -72,30 +61,26 @@ def handleAPI():
 
 @app.route("/setup")
 def setupSite():
-    if config.verifyUser(request.cookies.get('userID')):
+    if db.verifyUser(request.cookies.get('userID')):
         return redirect(url_for('indexPage'))
-
-    return render_template('setup.html')
+    else:
+        return render_template('setup.html')
 
 @app.route("/", methods=["POST", "GET"])
 def indexPage():
     token = request.cookies.get('userID')
     # Check if cookie is visible first
-    if not config.verifyUser(token):
+    if not db.verifyUser(token):
         return redirect(url_for('setupSite'))
 
     # Now handle front page
     global assignments, courses
     initGlobals()
     if request.method == "POST" or token not in assignments.keys() or token not in courses.keys(): # Data is reloaded or user token is not in thingies
-        userConfig = config.read(userToken=token)
-        loadToCache(token, userConfig["url"], userConfig["apiKey"])
+        userConfig = db.readUser(token)
+        loadToCache(token, userConfig[1], userConfig[2])
         
     return render_template('index.html', assignments=assignments[token])
 
 
-if config.validConfig(initConfig=True):  # Check if config is valid before doing anything
-    app.run(debug=True)
-else:
-    print("ERROR: There is an issue with config/api.json. Please check the file for problems!")
-
+app.run(debug=True)
