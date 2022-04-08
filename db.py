@@ -21,7 +21,7 @@ def validConfig(initConfig=False):  # Very messy sanity check
         fileExists = False
     if not fileExists and not initConfig:
         return False
-    elif fileExists and initConfig:
+    elif not fileExists and initConfig:
         with open(configLocation, 'w') as file:
             file.write('{}')
     # file exists
@@ -98,7 +98,7 @@ def readUser(userToken):
             cur.execute("SELECT * FROM accounts WHERE cookie = %s;", [userToken])
             return cur.fetchone()
 
-if validConfig():
+if validConfig(initConfig=True):
     initDB()
 else:
     print("Please check your database configuration!")
