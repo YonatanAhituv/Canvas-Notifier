@@ -24,13 +24,13 @@ def initGlobals():
         assignments = {}
         courses = {}
 
-def loadToCache(token, url, apiKey):
+def loadToCache(token, url, apiKey):  # Loads user info into a dictonary variable for caching
     global assignments, courses
-    initGlobals()
+    initGlobals()  # Initalizes globals as blank dictonaries if they don't exist
     loadedCourses, loadedAssignments = canvasHandler.retrieveAssignments(
-        url, apiKey)
-    courses[token] = loadedCourses
-    assignments[token] = loadedAssignments
+        url, apiKey)  # Retrieve assignments from canvasHandler
+    courses[token] = loadedCourses  # Assign courses to user token in cache
+    assignments[token] = loadedAssignments  # Assign assignments to user token in cache 
 
 @app.route('/favicon.ico')
 def favicon():
@@ -76,7 +76,7 @@ def indexPage():
     # Now handle front page
     global assignments, courses
     initGlobals()
-    if request.method == "POST" or token not in assignments.keys() or token not in courses.keys(): # Data is reloaded or user token is not in thingies
+    if request.method == "POST" or token not in assignments.keys() or token not in courses.keys(): # Page is reloaded or user token is not in cache
         userConfig = db.readUser(token)
         loadToCache(token, userConfig[1], userConfig[2])
         

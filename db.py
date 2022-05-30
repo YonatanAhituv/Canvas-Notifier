@@ -40,7 +40,7 @@ def readConfig():
 def initDB():
     config = readConfig()
     with psycopg.connect("dbname=%s user=%s" % (config["databaseName"], config["user"])) as conn:
-                         # Open a cursor to perform database operations
+            
         with conn.cursor() as cur:
             cur.execute("""CREATE TABLE IF NOT EXISTS accounts (
     cookie VARCHAR(86) PRIMARY KEY,
@@ -52,7 +52,6 @@ def initDB():
 def verifyUser(userToken):
     config = readConfig()
     with psycopg.connect("dbname=%s user=%s" % (config["databaseName"], config["user"])) as conn:
-        # Open a cursor to perform database operations
         with conn.cursor() as cur:
             cur.execute(
                 """SELECT cookie FROM accounts WHERE cookie = %s;""", [userToken])
@@ -65,7 +64,6 @@ def verifyUser(userToken):
 def getCookie(url, apiKey):
     config = readConfig()
     with psycopg.connect("dbname=%s user=%s" % (config["databaseName"], config["user"])) as conn:
-        # Open a cursor to perform database operations
         with conn.cursor() as cur:
             cur.execute("SELECT * FROM accounts WHERE url = %s AND apiKey = %s;", (url, apiKey))
             row = cur.fetchone()
@@ -83,7 +81,6 @@ def storeUser(url, apiKey):
     while readUser(userToken) is not None:  # Ensure doesn't exist
         userToken = token_urlsafe(64)
     with psycopg.connect("dbname=%s user=%s" % (config["databaseName"], config["user"])) as conn:
-        # Open a cursor to perform database operations
         with conn.cursor() as cur:
             cur.execute(
                 "INSERT INTO accounts (cookie, url, apiKey) VALUES (%s, %s, %s);",
@@ -93,7 +90,7 @@ def storeUser(url, apiKey):
 
 def readUser(userToken):
     config = readConfig()
-    with psycopg.connect("dbname=%s user=%s" % (config["databaseName"], config["user"])) as conn:  # Open a cursor to perform database operations
+    with psycopg.connect("dbname=%s user=%s" % (config["databaseName"], config["user"])) as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT * FROM accounts WHERE cookie = %s;", [userToken])
             return cur.fetchone()

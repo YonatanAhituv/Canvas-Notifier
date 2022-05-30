@@ -21,12 +21,12 @@ def futureDate(date):
 
 
 def getCourses(canvasURL, apiKey):
-    canvas = Canvas(canvasURL, apiKey)
-    user = canvas.get_current_user()
-    courses = user.get_courses(include=['term', 'total_scores'])
+    canvas = Canvas(canvasURL, apiKey)  # Initialize canvas api
+    user = canvas.get_current_user() # Get connected user
+    courses = user.get_courses(include=['term']) # Get courses as well as additional info
     visibleCourses = []
 
-    for course in courses:
+    for course in courses: # Keep only courses which end in the future (are currently being taken) 
         try: # If course is irregular somehow just keep going
             if course.term['end_at'] is None:
                 continue
@@ -37,7 +37,7 @@ def getCourses(canvasURL, apiKey):
 
     return visibleCourses
 
-def sortAssignmentsByDate(assignmentList):
+def sortAssignmentsByDate(assignmentList):  # Really inefficent spaghetti code to organize a list by date
     outputList = []
     if len(assignmentList) == 1:
         return assignmentList
@@ -54,17 +54,17 @@ def sortAssignmentsByDate(assignmentList):
     return outputList
 
 def retrieveAssignments(canvasURL, apiKey, inOrder=True, info={"name", "end"}, humanize=True, courseInTitle=False):
-    visibleCourses = getCourses(canvasURL, apiKey)
+    visibleCourses = getCourses(canvasURL, apiKey) # Retrieve courses
     courseAssignments = {}
-    for course in visibleCourses:
+    for course in visibleCourses: # Loop over courses
         # Get corresponding cal for assignments
         cal = requests.get(course.calendar['ics']).text
-        cal = Calendar(cal)
-        courseAssignments[course.name] = []
+        cal = Calendar(cal) # Process calander with ics from pypi
+        courseAssignments[course.name] = [] # Start organizing assignments into dict
         for assignment in cal.events:
-            if assignment.end > arrow.utcnow():
-                courseAssignments[course.name].append(assignment)
-    if inOrder:
+            if assignment.end > arrow.utcnow(): # Keep only assignments which aren't overdue
+                courseAssignments[course.name].append(assignment) # Add to course's corresponding list in dict
+    if inOrder:  # Order assignments if asked for
         for course in courseAssignments:
             courseAssignments[course] = sortAssignmentsByDate(courseAssignments[course])
     
